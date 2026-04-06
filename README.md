@@ -1,69 +1,34 @@
 <div align="center">
-  <img src="public/medical_scan.png" alt="PatientVoice Architecture" width="100%" style="border-radius:12px; margin-bottom:16px;" />
+  <img src="public/medical_scan.png" alt="PatientVoice Graphic" width="100%" style="border-radius:12px; margin-bottom:16px;" />
   <h1>🩺 PatientVoice AI</h1>
-  <p><strong>Next-Generation Clinical Diagnostics & Empathetic Patient Companion</strong></p>
+  <p><strong>Bridging the gap between what you feel and what your doctor hears.</strong></p>
 </div>
 
 ---
 
-## 📖 Overview
+## 💡 What's the Vibe?
 
-**PatientVoice** is a full-stack, AI-powered health technology application designed to bridge the communication gap between patients and medical professionals. By combining the ultra-fast inferencing capabilities of the **Groq LLaMA-3.1 model** with the secure infrastructure of **Supabase**, PatientVoice empowers users to log their symptoms, receive highly accurate differential diagnoses based on the Human Phenotype Ontology, and generate printable, clinical-grade reports.
+Ever tried explaining a weird symptom to a doctor and totally blanked out on the details? **PatientVoice** is built to fix exactly that. It's an AI-powered project I built to literally translate everyday human symptoms into clinical-grade terminology. 
 
-## ✨ Key Features
+You just dump whatever's bothering you into the text box, and the web app leverages the ridiculously fast **Groq LLaMA-3.1 model** to act like an elite medical diagnostician. It maps your symptoms against the Human Phenotype Ontology, generates potential medical conditions, and hands you concrete bullet points so you know *exactly* what to ask your doc. 
 
-- **🧠 Elite Medical Diagnostics:** Cross-references patient symptom narratives against established clinical guidelines and peer-reviewed literature to generate robust differential diagnoses.
-- **🗣️ Doctor-Patient Translation:** Automatically translates complex medical terminology into actionable "What to tell your doctor" talking points to improve clinical encounters.
-- **🔐 Secure Authentication & Profiles:** Engineered with strict Supabase Row Level Security (RLS). Users maintain persistent customized profiles (Age, Gender, Baseline Medical History) for personalized LLM context injection.
-- **📊 Dynamic Reporting Dashboard:** Automatically aggregates recent medical insights into an interactive analytics dashboard featuring your latest session data.
-- **🖨️ Clinical Exporting:** Seamlessly generates print-ready, CSS-optimized PDF medical reports stripped of UI boilerplate using `@media print` engineering.
-- **💻 Lightning Fast Stack:** Built natively on Next.js App Router, strictly typed with TypeScript, and styled with high-fidelity custom CSS variables.
+Everything is wrapped in a super clean, responsive UI built natively on **Next.js**, and securely synced to the cloud using **Supabase** backend auth. Plus, it features a dynamic dashboard tracking your medical reporting history!
 
-## 🛠️ Technology Stack
+## ✨ The Cool Stuff
 
-- **Frontend Core:** Next.js, React, TypeScript
-- **Styling UI/UX:** Custom Vanilla CSS Grid/Flexbox architecture, Web Fonts (Inter, Manrope)
-- **AI / LLM Integration:** Groq SDK (`llama-3.1-8b-instant`)
-- **Backend & Database:** Supabase (PostgreSQL, GoTrue Auth, Row Level Security)
+- **🧠 Elite Symptom Sleuthing:** Uses top-tier LLMs to analyze your raw symptom narratives and return highly accurate clinical differentials.
+- **🗣️ Doc-Translation:** It doesn't just guess what's wrong—it hands you a personalized cheat sheet of "What to tell your doctor" so you sound prepared during your appointment.
+- **🔐 Secure & Personal:** Hooked up with Supabase Auth and Row Level Security. It remembers your customized profile context (Age, History) so the AI gets smarter and more relevant the more you use it.
+- **🖨️ Magic PDF Exports:** Instead of taking screenshots, just hit 'Download' and the app uses custom CSS routing to strip all the UI elements out, giving you a pristine, professional clinical printout ready for a physician.
+- **💻 The Stack:** Natively built on Next.js 14 App Router, strictly typed with TS, connected to Postgres, and blazingly fast.
 
-## 🚀 Getting Started
+## 👨‍💻 Built By
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/Coder-015/PatientVoice.git
-cd PatientVoice
-```
+Designed, engineered, and shipped by **[Coder-015](https://github.com/Coder-015)**. 
 
-### 2. Install Dependencies
-```bash
-npm install
-```
+I'm super passionate about mashing bleeding-edge AI models with modern web stacks to build things that actually matter. PatientVoice was cooked up because health tech shouldn't feel incredibly rigid and complicated—it should feel empathetic, smart, and genuinely useful.
 
-### 3. Configure Environment Variables
-Create a local `.env.local` file in the root directory containing your API and Database tokens:
-```env
-GROQ_API_KEY=your_groq_api_key_here
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-### 4. Database Setup
-Run the `setup_v2.sql` and `fix_delete.sql` scripts located in the root of the project within your Supabase SQL Editor. This automatically generates the tables for `profiles`, `consultations`, and securely binds the Row Level Security limits.
-
-### 5. Launch the Application
-```bash
-npm run dev
-```
+Feel free to check out my other repos and projects over on my [GitHub Profile](https://github.com/Coder-015). Peace! ✌️
 
 ---
-
-## 👨‍💻 About the Developer
-
-Designed and engineered by **[Coder-015](https://github.com/Coder-015)**. 
-
-Passionate about leveraging bleeding-edge Large Language Models and modern full-stack web architectures to solve meaningful, real-world problems. PatientVoice was built to address the friction in preliminary symptom assessment and to push the boundaries of what empathetic AI can achieve in consumer health tech. 
-
-Check out more of my work on my [GitHub Profile](https://github.com/Coder-015).
-
----
-*Disclaimer: PatientVoice is an experimental AI application designed for informational augmentation. It does not replace professional medical diagnosis or advice.*
+*Disclaimer: PatientVoice is an experimental side project built for informational augmentation. It definitely doesn't replace real medical advice from an actual doctor.*
