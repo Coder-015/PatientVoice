@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 function AnalysisContent() {
   const searchParams = useSearchParams();
@@ -163,13 +164,15 @@ function AnalysisContent() {
           {chatMessages.length === 0 ? (
             <p style={{ fontSize: '14px', color: 'var(--on-surface-variant)', fontStyle: 'italic' }}>Got questions about this report? Ask our medical AI below.</p>
           ) : chatMessages.map((m, i) => (
-            <div key={i} style={{ alignSelf: m.role==='user'?'flex-end':'flex-start', background: m.role==='user'?'var(--primary)':'var(--surface-high)', color: m.role==='user'?'var(--on-primary, white)':'var(--on-surface)', padding: '12px 18px', borderRadius: '18px', maxWidth: '85%', fontSize: '14px', lineHeight: '1.6' }}>
+            <div key={i} style={{ alignSelf: m.role==='user'?'flex-end':'flex-start', background: m.role==='user'?'var(--primary)':'var(--surface-high)', color: m.role==='user'?'var(--on-primary, white)':'var(--on-surface)', padding: '16px 20px', borderRadius: '18px', maxWidth: '85%', fontSize: '15px', lineHeight: '1.6' }}>
               <ReactMarkdown 
+                remarkPlugins={[remarkGfm]}
                 components={{
-                  p: ({node, ...props}) => <p style={{ marginBottom: '8px' }} {...props} />,
-                  ul: ({node, ...props}) => <ul style={{ paddingLeft: '20px', marginBottom: '8px' }} {...props} />,
-                  ol: ({node, ...props}) => <ol style={{ paddingLeft: '20px', marginBottom: '8px' }} {...props} />,
-                  strong: ({node, ...props}) => <strong style={{ fontWeight: 800 }} {...props} />
+                  p: ({node, ...props}) => <p style={{ marginBottom: '12px' }} {...props} />,
+                  ul: ({node, ...props}) => <ul style={{ paddingLeft: '24px', marginBottom: '12px', listStyleType: 'disc' }} {...props} />,
+                  ol: ({node, ...props}) => <ol style={{ paddingLeft: '24px', marginBottom: '12px', listStyleType: 'decimal' }} {...props} />,
+                  li: ({node, ...props}) => <li style={{ marginBottom: '4px' }} {...props} />,
+                  strong: ({node, ...props}) => <strong style={{ fontWeight: 800, color: m.role==='user'?'inherit':'var(--primary)' }} {...props} />
                 }}
               >
                 {m.content}
