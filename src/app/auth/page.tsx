@@ -18,8 +18,13 @@ export default function AuthPage() {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email: 'demo@patientvoice.com', password: 'DemoPassword123!' });
       if (error) {
-        await supabase.auth.signUp({ email: 'demo@patientvoice.com', password: 'DemoPassword123!' });
-        await supabase.auth.signInWithPassword({ email: 'demo@patientvoice.com', password: 'DemoPassword123!' });
+        const { data, error: signUpError } = await supabase.auth.signUp({ email: 'demo@patientvoice.com', password: 'DemoPassword123!' });
+        if (signUpError) throw signUpError;
+        
+        // If Supabase didn't log us in automatically, it means Email Confirmations are turned on in settings!
+        if (!data.session) {
+          throw new Error("Demo requires you to disable 'Confirm email' in your Supabase Authentication settings.");
+        }
       }
       router.push('/');
     } catch (err: any) {
