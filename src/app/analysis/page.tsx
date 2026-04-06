@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import ReactMarkdown from 'react-markdown';
 
 function AnalysisContent() {
   const searchParams = useSearchParams();
@@ -162,8 +163,17 @@ function AnalysisContent() {
           {chatMessages.length === 0 ? (
             <p style={{ fontSize: '14px', color: 'var(--on-surface-variant)', fontStyle: 'italic' }}>Got questions about this report? Ask our medical AI below.</p>
           ) : chatMessages.map((m, i) => (
-            <div key={i} style={{ alignSelf: m.role==='user'?'flex-end':'flex-start', background: m.role==='user'?'var(--primary)':'var(--surface-high)', color: m.role==='user'?'white':'var(--on-surface)', padding: '12px 18px', borderRadius: '18px', maxWidth: '85%', fontSize: '14px', lineHeight: '1.6' }}>
-              {m.content}
+            <div key={i} style={{ alignSelf: m.role==='user'?'flex-end':'flex-start', background: m.role==='user'?'var(--primary)':'var(--surface-high)', color: m.role==='user'?'var(--on-primary, white)':'var(--on-surface)', padding: '12px 18px', borderRadius: '18px', maxWidth: '85%', fontSize: '14px', lineHeight: '1.6' }}>
+              <ReactMarkdown 
+                components={{
+                  p: ({node, ...props}) => <p style={{ marginBottom: '8px' }} {...props} />,
+                  ul: ({node, ...props}) => <ul style={{ paddingLeft: '20px', marginBottom: '8px' }} {...props} />,
+                  ol: ({node, ...props}) => <ol style={{ paddingLeft: '20px', marginBottom: '8px' }} {...props} />,
+                  strong: ({node, ...props}) => <strong style={{ fontWeight: 800 }} {...props} />
+                }}
+              >
+                {m.content}
+              </ReactMarkdown>
             </div>
           ))}
           {isChatting && <div style={{ alignSelf: 'flex-start', background: 'var(--surface-high)', color: 'var(--on-surface)', padding: '12px 18px', borderRadius: '18px', fontSize: '14px', fontStyle: 'italic' }}>Typing...</div>}
