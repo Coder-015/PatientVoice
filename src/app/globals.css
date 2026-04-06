@@ -22,6 +22,56 @@
     --tertiary-container: #a05f2e;
   }
 
+  [data-theme='dark'] {
+    --primary: #8bf1e6;
+    --primary-container: #004d52;
+    --primary-fixed: #006067;
+    --primary-fixed-dim: #007b83;
+    --secondary: #8bf1e6;
+    --secondary-container: #00504a;
+    --on-secondary-container: #8bf1e6;
+    --surface: #0a0a0a;
+    --surface-lowest: #000000;
+    --surface-low: #111111;
+    --surface-container: #1a1a1a;
+    --surface-high: #222222;
+    --surface-highest: #2a2a2a;
+    --on-surface: #f0f0f0;
+    --on-surface-variant: #aaaaaa;
+    --outline: #555555;
+    --outline-variant: #333333;
+    --error: #ffb4ab;
+    --error-container: #93000a;
+  }
+  
+  [data-theme='dark'] .sidebar,
+  [data-theme='dark'] .topbar,
+  [data-theme='dark'] .card,
+  [data-theme='dark'] .featured-card,
+  [data-theme='dark'] .narrative-card,
+  [data-theme='dark'] .mapping-card,
+  [data-theme='dark'] .report-mini-card,
+  [data-theme='dark'] .archived-row,
+  [data-theme='dark'] .history-card,
+  [data-theme='dark'] .stat-card,
+  [data-theme='dark'] .recent-item,
+  [data-theme='dark'] .voice-card,
+  [data-theme='dark'] .why-card,
+  [data-theme='dark'] .how-card,
+  [data-theme='dark'] .tips-card {
+    background: var(--surface-low);
+    border: 1px solid var(--surface-high);
+    box-shadow: none;
+  }
+  
+  [data-theme='dark'] .topbar { background: rgba(17,17,17,0.85); border-bottom: 1px solid var(--surface-high); }
+  [data-theme='dark'] .sidebar { border-right: 1px solid var(--surface-high); background: var(--surface); }
+  [data-theme='dark'] .empty-card { border-color: var(--outline-variant); }
+  [data-theme='dark'] .btn-outline { background: transparent; }
+  [data-theme='dark'] input, [data-theme='dark'] select, [data-theme='dark'] textarea { background: var(--surface-low); color: var(--on-surface); border-color: var(--surface-highest); }
+  [data-theme='dark'] .filter-input { background: var(--surface-low); border-color: var(--surface-highest); }
+  [data-theme='dark'] .app-layout { background: var(--surface); }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {

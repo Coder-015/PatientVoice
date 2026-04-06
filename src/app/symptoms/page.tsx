@@ -7,7 +7,44 @@ import { supabase } from '@/lib/supabaseClient';
 export default function Symptoms() {
   const [symptoms, setSymptoms] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const router = useRouter();
+
+  const bodyParts = ['Head', 'Neck', 'Chest', 'Back', 'Stomach/Abdomen', 'Arm/Hand', 'Leg/Foot', 'Joints', 'Skin', 'Whole Body'];
+
+  const handleBodyPartClick = (part: string) => {
+    setSymptoms((prev) => prev + (prev ? ' \n' : '') + `[Location: ${part}] - `);
+  };
+
+  const startListening = () => {
+    // @ts-ignore
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Your browser does not support Speech Recognition. Try Chrome or Safari.");
+      return;
+    }
+
+    if (isListening) return; // Prevent multiple instances
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false; // Stop when they pause
+    recognition.interimResults = false;
+
+    recognition.onstart = () => setIsListening(true);
+    
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setSymptoms((prev) => prev + (prev ? ' ' : '') + transcript);
+    };
+    
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = (e: any) => {
+      console.error(e);
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
 
   const startAnalysis = async () => {
     if (!symptoms.trim()) return;
@@ -87,9 +124,15 @@ export default function Symptoms() {
             onChange={(e) => setSymptoms(e.target.value)}
           ></textarea>
           <div className="voice-footer">
-            <div className="voice-mic">
-              <span className="material-symbols-outlined">mic</span>
-              <span>Prefer to speak? Record a voice note.</span>
+            <div 
+              className="voice-mic" 
+              onClick={startListening} 
+              style={{ cursor: 'pointer', color: isListening ? 'var(--error)' : 'var(--on-surface-variant)', fontWeight: isListening ? 700 : 400, transition: 'all 0.3s' }}
+            >
+              <span className="material-symbols-outlined" style={{ color: isListening ? 'var(--error)' : 'var(--primary)' }}>
+                {isListening ? 'graphic_eq' : 'mic'}
+              </span>
+              <span>{isListening ? 'Listening... Speak now.' : 'Prefer to speak? Tap to dictate.'}</span>
             </div>
             <button className="btn-primary" onClick={startAnalysis} disabled={isLoading || !symptoms.trim()}>
               {isLoading ? 'Analyzing...' : 'Start Analysis'}
@@ -99,6 +142,25 @@ export default function Symptoms() {
         </div>
 
         <div className="sidebar-cards">
+          <div className="why-card">
+            <h3>Quick Body Select</h3>
+            <p style={{fontSize: '13px', color: 'var(--on-surface-variant)', marginBottom: '16px'}}>Tap affected locations to instantly append them to your narrative context.</p>
+            <div style={{display: 'flex', flexWrap: 'wrap', gap: '8px'}}>
+              {bodyParts.map(part => (
+                <div 
+                  key={part} 
+                  onClick={() => handleBodyPartClick(part)} 
+                  style={{background: 'var(--surface)', padding: '8px 14px', borderRadius: '12px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: '1px solid var(--outline-variant)', transition: 'all 0.2s', display: 'flex', gap: '4px', alignItems: 'center'}}
+                  onMouseOver={(e: any) => e.target.style.borderColor = 'var(--primary)'}
+                  onMouseOut={(e: any) => e.target.style.borderColor = 'var(--outline-variant)'}
+                >
+                  {part} 
+                  <span className="material-symbols-outlined" style={{fontSize: '14px', color: 'var(--primary)'}}>add</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          
           <div className="why-card">
             <h3>Why this matters</h3>
             <div className="why-item">

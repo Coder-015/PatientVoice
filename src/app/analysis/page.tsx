@@ -9,6 +9,10 @@ function AnalysisContent() {
   const id = searchParams.get('id');
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [doctorEmail, setDoctorEmail] = useState('');
+  const [chatMessages, setChatMessages] = useState<{role: string, content: string}[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [isChatting, setIsChatting] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -27,11 +31,56 @@ function AnalysisContent() {
         console.error('Error fetching data', error);
       } else {
         setData(result);
+        
+        // Fetch profile to see if doctor email is registered
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const { data: profile } = await supabase.from('profiles').select('doctor_email').eq('id', session.user.id).single();
+          if (profile?.doctor_email) {
+            setDoctorEmail(profile.doctor_email);
+          }
+        }
       }
       setLoading(false);
     }
     fetchData();
   }, [id]);
+
+  const handleEmailDoctor = () => {
+    if (!doctorEmail) {
+      alert("Please set your Family Doctor Email in the Profile Settings first.");
+      return;
+    }
+    const analysis = data.analysis_result || {};
+    const subject = `PatientVoice Clinical Brief - ${data.id.substring(0,8)}`;
+    const body = `Hello,\n\nPlease review my recent symptom analysis generated via PatientVoice.\n\nNarrative: ${data.symptoms}\n\nTop Differentials:\n${analysis.differentialDiagnosis?.map((d:any) => `- ${d.name} (${d.score}%)`).join('\n')}\n\nThank you.`;
+    window.location.href = `mailto:${doctorEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
+  const handleSendChat = async () => {
+    if(!chatInput.trim()) return;
+    const newMsgs = [...chatMessages, {role: 'user', content: chatInput}];
+    setChatMessages(newMsgs);
+    setChatInput('');
+    setIsChatting(true);
+    
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: newMsgs, consultationId: data.id })
+      });
+      const resData = await res.json();
+      if(res.ok) {
+        setChatMessages([...newMsgs, {role: 'assistant', content: resData.reply}]);
+      } else {
+        alert("Error sending message: " + resData.error);
+      }
+    } catch(err) {
+      console.error(err);
+    }
+    setIsChatting(false);
+  };
 
   if (loading) {
     return <div style={{ padding: 40 }}>Loading analysis...</div>;
@@ -107,7 +156,30 @@ function AnalysisContent() {
         </div>
       )}
       
-      <div className="save-btn" style={{ marginTop: '24px' }}>
+      <div className="card" style={{ marginTop: '24px' }}>
+        <div className="hpo-label" style={{ marginBottom: '20px' }}>Ask Follow-Up Questions</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '20px', maxHeight: '400px', overflowY: 'auto' }}>
+          {chatMessages.length === 0 ? (
+            <p style={{ fontSize: '14px', color: 'var(--on-surface-variant)', fontStyle: 'italic' }}>Got questions about this report? Ask our medical AI below.</p>
+          ) : chatMessages.map((m, i) => (
+            <div key={i} style={{ alignSelf: m.role==='user'?'flex-end':'flex-start', background: m.role==='user'?'var(--primary)':'var(--surface-high)', color: m.role==='user'?'white':'var(--on-surface)', padding: '12px 18px', borderRadius: '18px', maxWidth: '85%', fontSize: '14px', lineHeight: '1.6' }}>
+              {m.content}
+            </div>
+          ))}
+          {isChatting && <div style={{ alignSelf: 'flex-start', background: 'var(--surface-high)', color: 'var(--on-surface)', padding: '12px 18px', borderRadius: '18px', fontSize: '14px', fontStyle: 'italic' }}>Typing...</div>}
+        </div>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <input type="text" value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSendChat()} placeholder="Ask about symptoms, conditions, etc..." style={{ flex: 1, padding: '14px', borderRadius: '999px', border: '1.5px solid var(--outline-variant)', background: 'var(--surface-low)', color: 'var(--on-surface)', outline: 'none' }} />
+          <button className="btn-primary" onClick={handleSendChat} disabled={isChatting} style={{ padding: '10px 24px' }}>
+            <span className="material-symbols-outlined">send</span> Send
+          </button>
+        </div>
+      </div>
+      
+      <div className="save-btn" style={{ marginTop: '24px', gap: '12px' }}>
+        <button className="btn-outline" onClick={handleEmailDoctor} style={{ border: '2px solid var(--primary)' }}>
+          <span className="material-symbols-outlined">mail</span> Forward to Doctor
+        </button>
         <button className="btn-primary" onClick={() => window.print()}>
           <span className="material-symbols-outlined">download</span> Download PDF Report
         </button>

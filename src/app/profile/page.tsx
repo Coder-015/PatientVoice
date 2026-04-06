@@ -12,7 +12,9 @@ export default function ProfilePage() {
     full_name: '',
     age: '',
     gender: '',
-    medical_history: ''
+    medical_history: '',
+    doctor_name: '',
+    doctor_email: ''
   });
 
   useEffect(() => {
@@ -25,7 +27,9 @@ export default function ProfilePage() {
             full_name: data.full_name || '',
             age: data.age || '',
             gender: data.gender || '',
-            medical_history: data.medical_history || ''
+            medical_history: data.medical_history || '',
+            doctor_name: data.doctor_name || '',
+            doctor_email: data.doctor_email || ''
           });
         }
       }
@@ -124,6 +128,32 @@ export default function ProfilePage() {
               style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--outline-variant)', minHeight: '120px', fontFamily: 'Inter', resize: 'vertical' }} 
               placeholder="List any chronic conditions, past major surgeries, or ongoing medications..." 
             />
+          </div>
+
+          <div style={{ padding: '20px 0', borderTop: '1px solid var(--surface-high)', paddingTop: '20px' }}>
+            <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '16px', color: 'var(--primary)' }}>Doctor Connectivity</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>Family Doctor Name</label>
+                <input 
+                  type="text" 
+                  value={profile.doctor_name}
+                  onChange={(e) => setProfile({...profile, doctor_name: e.target.value})}
+                  style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--outline-variant)' }} 
+                  placeholder="Dr. Smith" 
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>Doctor Email</label>
+                <input 
+                  type="email" 
+                  value={profile.doctor_email}
+                  onChange={(e) => setProfile({...profile, doctor_email: e.target.value})}
+                  style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--outline-variant)' }} 
+                  placeholder="clinic@example.com" 
+                />
+              </div>
+            </div>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>

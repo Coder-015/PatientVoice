@@ -2,9 +2,24 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export default function Topbar() {
   const pathname = usePathname();
+  const [theme, setTheme] = useState('light');
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('pv-theme') || 'light';
+    setTheme(savedTheme);
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('pv-theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
 
   return (
     <nav className="topbar">
@@ -16,6 +31,9 @@ export default function Topbar() {
         <Link href="/history" className={pathname.startsWith('/history') ? 'active' : ''}>History</Link>
       </div>
       <div className="topbar-actions">
+        <button className="icon-btn" onClick={toggleTheme} title="Toggle Dark Mode">
+          <span className="material-symbols-outlined">{theme === 'dark' ? 'light_mode' : 'dark_mode'}</span>
+        </button>
         <button className="icon-btn" onClick={() => alert('No new notifications!')}>
           <span className="material-symbols-outlined">notifications</span>
         </button>
