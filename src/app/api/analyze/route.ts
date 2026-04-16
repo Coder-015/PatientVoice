@@ -30,7 +30,7 @@ export async function POST(req: Request) {
           {
             "condition": "Primary suspected condition (short name)",
             "confidence": 92.5, // number between 0-100 indicating percentage
-            "summary": "A 1-2 sentence empathetic summary matching what they said.",
+            "clinical_reasoning": "A deeply analytical, professional 2-3 paragraph clinical reasoning summary explaining exactly WHY these differential diagnoses were selected. Reference the patient's age/gender, rule in/out red flags, and establish an evidence-based narrative.",
             "hpoTerms": [
                 { "code": "HP:0000000", "name": "Term Name", "desc": "Brief desc" }
             ],

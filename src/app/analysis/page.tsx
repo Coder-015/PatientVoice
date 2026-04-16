@@ -102,6 +102,18 @@ function AnalysisContent() {
         <p className="analysis-subtitle">Based on your narrative, here is how our AI models interpreted your symptoms mapped to established medical ontologies.</p>
       </div>
 
+      {analysis.clinical_reasoning && (
+        <div className="card" style={{ marginBottom: '24px', backgroundColor: 'var(--primary-container)', borderColor: 'var(--primary)', color: 'var(--on-primary-container)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+             <span className="material-symbols-outlined" style={{ color: 'var(--primary)', fontSize: '20px' }}>neurology</span>
+             <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--on-primary-container)' }}>Clinical Reasoning Engine</h3>
+          </div>
+          <p style={{ fontSize: '14.5px', lineHeight: '1.7', whiteSpace: 'pre-wrap', opacity: 0.9 }}>
+            {analysis.clinical_reasoning}
+          </p>
+        </div>
+      )}
+
       <div className="analysis-grid">
         <div className="narrative-card">
           <div className="narrative-header">
