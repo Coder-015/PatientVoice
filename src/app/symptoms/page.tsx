@@ -3,11 +3,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import SymptomImageUpload from '@/components/SymptomImageUpload';
 
 export default function Symptoms() {
   const [symptoms, setSymptoms] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [mimeType, setMimeType] = useState<string | null>(null);
+  const [isFocused, setIsFocused] = useState(false);
   const router = useRouter();
 
   const bodyParts = ['Head', 'Neck', 'Chest', 'Back', 'Stomach/Abdomen', 'Arm/Hand', 'Leg/Foot', 'Joints', 'Skin', 'Whole Body'];
@@ -51,12 +55,34 @@ export default function Symptoms() {
     
     setIsLoading(true);
     try {
+      console.log('[SUBMIT] imageBase64 present:', !!imageBase64);
+      console.log('[SUBMIT] imageBase64 length:', imageBase64?.length ?? 0);
+      
+      sessionStorage.setItem('symptomImage', imageBase64 ?? '');
+      sessionStorage.setItem('symptomMime', mimeType ?? '');
+
       const { data: { session } } = await supabase.auth.getSession();
+      
+      let visualFindings = '';
+      if (imageBase64 && mimeType) {
+        console.log('[ANALYSIS] image found, calling analyze-image...');
+        // Call analyze-image first
+        const visionRes = await fetch('/api/analyze-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageBase64, mimeType, textSymptoms: symptoms, userId: session?.user?.id }),
+        });
+        if (visionRes.ok) {
+          const visionData = await visionRes.json();
+          visualFindings = visionData.visualFindings;
+          console.log('[ANALYSIS] visualFindings received:', visualFindings.slice(0, 100));
+        }
+      }
       
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ symptoms, userId: session?.user?.id }),
+        body: JSON.stringify({ symptoms, userId: session?.user?.id, visualFindings }),
       });
       
       const data = await res.json();
@@ -72,6 +98,13 @@ export default function Symptoms() {
       console.error(err);
       setIsLoading(false);
     }
+  };
+
+  const getCharCountColor = () => {
+    const len = symptoms.length;
+    if (len < 200) return '#10b981'; // green
+    if (len <= 500) return '#f59e0b'; // amber
+    return '#ef4444'; // red
   };
 
   return (
@@ -114,16 +147,40 @@ export default function Symptoms() {
 
       <div className="input-grid">
         <div className="voice-card">
-          <div className="voice-label">Your Voice</div>
+          <div className="voice-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>Your Voice</span>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: getCharCountColor() }}>
+              {symptoms.length} chars
+            </span>
+          </div>
           <textarea 
             className="voice-textarea" 
             id="symptomText" 
             placeholder="Today, I woke up with a dull pressure behind my left eye..." 
             rows={10}
             value={symptoms}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             onChange={(e) => setSymptoms(e.target.value)}
+            style={{ 
+              transition: 'all 0.3s ease',
+              boxShadow: isFocused ? '0 0 0 3px rgba(0, 160, 176, 0.2)' : 'none',
+              borderColor: isFocused ? 'var(--primary)' : 'var(--outline-variant)'
+            }}
           ></textarea>
-          <div className="voice-footer">
+          
+          <div style={{ animation: 'fadeInUp 0.5s ease-out' }}>
+            <SymptomImageUpload 
+              onImageChange={(base64, mime) => { 
+                setImageBase64(base64); 
+                setMimeType(mime); 
+                console.log('[SYMPTOMS PAGE] image state updated, length:', base64?.length);
+              }}
+              onClear={() => { setImageBase64(null); setMimeType(null); }}
+            />
+          </div>
+
+          <div className="voice-footer" style={{ marginTop: '20px' }}>
             <div 
               className="voice-mic" 
               onClick={startListening} 
@@ -134,9 +191,10 @@ export default function Symptoms() {
               </span>
               <span>{isListening ? 'Listening... Speak now.' : 'Prefer to speak? Tap to dictate.'}</span>
             </div>
-            <button className="btn-primary" onClick={startAnalysis} disabled={isLoading || !symptoms.trim()}>
-              {isLoading ? 'Analyzing...' : 'Start Analysis'}
-              <span className="material-symbols-outlined">arrow_forward</span>
+            <button className="btn-primary" onClick={startAnalysis} disabled={isLoading || !symptoms.trim()} style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: (isLoading || !symptoms.trim()) ? 0.7 : 1 }}>
+              {isLoading && <div className="loading-pulse" style={{ width: '16px', height: '16px', borderWidth: '2px', position: 'static' }}></div>}
+              {isLoading ? (imageBase64 ? 'Analyzing Image...' : 'Analyzing...') : 'Start Analysis'}
+              {!isLoading && <span className="material-symbols-outlined">arrow_forward</span>}
             </button>
           </div>
         </div>

@@ -11,9 +11,18 @@ export default function History() {
 
   useEffect(() => {
     async function fetchHistory() {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.user?.id) {
+        setHistory([]);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('consultations')
         .select('*')
+        .eq('user_id', session.user.id)
         .order('created_at', { ascending: false });
         
       if (!error && data) {
@@ -50,7 +59,19 @@ export default function History() {
       </div>
 
       {loading ? (
-        <div style={{ padding: 40 }}>Loading history...</div>
+        <div className="history-grid">
+           {[...Array(4)].map((_, i) => (
+             <div key={i} className="history-card" style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
+               <div style={{ height: 20, background: 'var(--surface-high)', borderRadius: 4, width: '40%', marginBottom: 16 }}></div>
+               <div style={{ height: 16, background: 'var(--surface-high)', borderRadius: 4, width: '100%', marginBottom: 8 }}></div>
+               <div style={{ height: 16, background: 'var(--surface-high)', borderRadius: 4, width: '80%', marginBottom: 24 }}></div>
+               <div style={{ display: 'flex', gap: 8 }}>
+                 <div style={{ height: 24, background: 'var(--surface-high)', borderRadius: 12, width: '30%' }}></div>
+                 <div style={{ height: 24, background: 'var(--surface-high)', borderRadius: 12, width: '30%' }}></div>
+               </div>
+             </div>
+           ))}
+        </div>
       ) : history.length === 0 ? (
         <div className="empty-card" style={{ marginTop: '32px' }}>
           <div className="empty-icon"><span className="material-symbols-outlined">inbox</span></div>
@@ -64,7 +85,7 @@ export default function History() {
         <div className="history-grid">
           {history.map((record) => (
             <Link key={record.id} href={`/analysis?id=${record.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <div className="history-card">
+              <div className="history-card hover:-translate-y-1 transition-transform duration-200" style={{ transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}>
                 <div className="history-card-top">
                   <div>
                     <div className="history-date">
@@ -72,10 +93,19 @@ export default function History() {
                     </div>
                     <div className="history-condition">{record.condition || 'Pending Analysis'}</div>
                   </div>
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <span className={`status-pill ${record.condition ? 'status-generated' : 'status-draft'}`}>
-                      {record.condition ? 'Generated' : 'Draft'}
-                    </span>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    {record.analysis_result?.urgency && (
+                      <span style={{ 
+                        fontSize: '12px', padding: '4px 10px', borderRadius: '12px', fontWeight: 700,
+                        background: record.analysis_result.urgency === 'Emergency' ? '#fee2e2' : record.analysis_result.urgency === 'Urgent' ? '#fef3c7' : '#d1fae5',
+                        color: record.analysis_result.urgency === 'Emergency' ? '#ef4444' : record.analysis_result.urgency === 'Urgent' ? '#f59e0b' : '#10b981'
+                      }}>
+                        {record.analysis_result.urgency}
+                      </span>
+                    )}
+                    {record.analysis_result?.visualFindings && (
+                      <span className="material-symbols-outlined" style={{ color: 'var(--outline-variant)', fontSize: '18px' }} title="Image included">photo_camera</span>
+                    )}
                     <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeleteTarget(record.id); }} className="icon-btn" style={{ color: 'var(--error)' }}>
                       <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>delete</span>
                     </button>
