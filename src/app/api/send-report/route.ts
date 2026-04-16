@@ -21,11 +21,8 @@ export async function POST(req: Request) {
       }
     });
 
-    // Enable table parsing
-    marked.setOptions({ gfm: true, breaks: true });
-    
-    // Fallback if marked is async in some versions, but mostly synchronous
-    const parsedMarkup = await marked.parse(reportMarkdown);
+    // Use modern marked API
+    const parsedMarkup = await marked.parse(reportMarkdown, { gfm: true, breaks: true } as any);
     const reportHTML = typeof parsedMarkup === 'string' ? parsedMarkup : reportMarkdown;
 
     await transporter.sendMail({
