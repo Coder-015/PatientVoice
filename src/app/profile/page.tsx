@@ -131,7 +131,14 @@ export default function ProfilePage() {
           </div>
 
           <div style={{ padding: '20px 0', borderTop: '1px solid var(--surface-high)', paddingTop: '20px' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '16px', color: 'var(--primary)' }}>Doctor Connectivity</h3>
+            <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '16px', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              Doctor Connectivity
+              {profile.doctor_email && profile.doctor_email.includes('@') && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', background: '#d1fae5', color: '#10b981', padding: '2px 8px', borderRadius: '12px' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>check_circle</span> Verified
+                </span>
+              )}
+            </h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>Family Doctor Name</label>

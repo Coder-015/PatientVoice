@@ -82,10 +82,24 @@ export default function Reports() {
         <div className="report-grid">
           {history.map(record => (
             <Link key={record.id} href={`/analysis?id=${record.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <div className="report-mini-card">
+              <div className="report-mini-card hover:-translate-y-1 transition-transform duration-200" style={{ transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}>
                 <div className="mini-top">
                   <div className="mini-icon"><span className="material-symbols-outlined">microbiology</span></div>
-                  <div className="mini-conf">{record.confidence}%</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {record.analysis_result?.urgency && (
+                      <span style={{
+                        fontSize: '11px', padding: '2px 8px', borderRadius: '10px', fontWeight: 700,
+                        background: record.analysis_result.urgency === 'Emergency' ? '#fee2e2' : record.analysis_result.urgency === 'Urgent' ? '#fef3c7' : '#d1fae5',
+                        color: record.analysis_result.urgency === 'Emergency' ? '#ef4444' : record.analysis_result.urgency === 'Urgent' ? '#f59e0b' : '#10b981'
+                      }}>
+                        {record.analysis_result.urgency}
+                      </span>
+                    )}
+                    {record.analysis_result?.visualFindings && (
+                      <span className="material-symbols-outlined" style={{ color: 'var(--outline-variant)', fontSize: '16px' }} title="Image included">photo_camera</span>
+                    )}
+                    <div className="mini-conf">{record.confidence}%</div>
+                  </div>
                 </div>
                 <div className="mini-date">
                   {new Date(record.created_at).toLocaleDateString()}

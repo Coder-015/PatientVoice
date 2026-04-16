@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 import { supabase } from '@/lib/supabaseClient';
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || 'dummy_for_build' });
 
 export async function POST(req: Request) {
   try {
-    const { symptoms, userId } = await req.json();
+    const { symptoms, userId, visualFindings } = await req.json();
 
     if (!symptoms) {
       return NextResponse.json({ error: 'Symptoms are required' }, { status: 400 });
@@ -20,34 +20,53 @@ export async function POST(req: Request) {
       }
     }
 
+    // TODO: HPO_DATASET_INTEGRATION
+    const enrichedPrompt = visualFindings
+      ? `Patient text symptoms: ${symptoms}\n\nVisual symptom analysis from patient-uploaded image:\n${visualFindings}\n\nPlease incorporate both text and visual findings into the HPO mapping and differential report.`
+      : `Patient text symptoms: ${symptoms}`;
+      
+    console.log('[ANALYSIS] enrichedPrompt length:', enrichedPrompt.length);
+
     // Call Groq API
     const chatCompletion = await groq.chat.completions.create({
       messages: [
         {
           role: 'system',
-          content: `You are an elite, highly skilled medical diagnostician and empathetic physician assistant. You possess vast knowledge of peer-reviewed medical literature, clinical guidelines, and the Human Phenotype Ontology (HPO). Your goal is to deeply analyze the user's symptoms, cross-reference them with established medical databases, and provide a highly accurate, evidence-based clinical brief. Always maintain an empathetic, reassuring tone, but be strictly clinical and precise in your medical categorizations. Consider systemic involvements and edge cases if applicable. ${profileContext}
-          Respond strictly in JSON format with the following structure:
-          {
-            "condition": "Primary suspected condition (short name)",
-            "confidence": 92.5, // number between 0-100 indicating percentage
-            "summary": "A 1-2 sentence empathetic summary matching what they said.",
-            "hpoTerms": [
-                { "code": "HP:0000000", "name": "Term Name", "desc": "Brief desc" }
-            ],
-            "differentialDiagnosis": [
-                { "name": "Alternative Condition", "score": 85 }
-            ],
-            "doctorCommunication": [
-                { "topic": "Key point to mention", "question": "Suggested question to ask the doctor" }
-            ]
-          }`,
+          content: `You are a clinical documentation assistant trained in the Human Phenotype Ontology (HPO). When a patient describes symptoms — via text OR image — you must:
+
+1. Map each symptom to its canonical HPO term (e.g. "bad headache" → HP:0002315 Headache).
+2. Generate a structured differential diagnosis report with sections:
+   - Patient Symptom Summary (plain English)
+   - Visual Findings (If an image was provided, add a section detailing your clinical observations of the image)
+   - HPO Term Mapping Table (Symptom | HPO ID | HPO Label | Confidence %)
+   - Differential Diagnoses (ranked, with brief clinical reasoning per diagnosis)
+   - Recommended Specialist & Urgency Level (Routine / Urgent / Emergency)
+   - Red Flag Symptoms (if any detected — highlight these prominently)
+   - Questions the Doctor Should Ask
+3. If an image was provided, describe visible clinical signs (rash morphology, swelling, discoloration, wound state, etc.) and factor them into the HPO mapping and differentials.
+4. Output clean Markdown so react-markdown renders it beautifully.
+5. Never give definitive diagnoses. Always frame as "differential considerations".
+6. Footer disclaimer: "This report is AI-generated for clinical communication purposes only and does not constitute a medical diagnosis."
+
+${profileContext}
+
+Respond strictly in JSON format with the following structure:
+{
+  "condition": "Primary suspected condition (short name)",
+  "confidence": 92,
+  "urgency": "Routine",
+  "markdown_report": "The complete, structured Markdown-formatted report goes here as a single string",
+  "hpoTerms": [
+      { "code": "HP:0000000", "name": "Term Name", "desc": "Brief desc" }
+  ]
+}`,
         },
         {
           role: 'user',
-          content: symptoms,
+          content: enrichedPrompt,
         },
       ],
-      model: 'llama-3.1-8b-instant',
+      model: 'llama-3.3-70b-versatile',
       response_format: { type: 'json_object' },
     });
 
